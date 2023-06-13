@@ -10,6 +10,6 @@
         <property name="connection.password">3444</property>
         <!--<property name="hibernate.hbm2ddl.auto">update</property>-->
         <property name="hibernate.hbm2ddl.auto">create</property>
-        <mapping class="entity.UsersEntity"/>
+        <mapping class="web.entity.UserEntity"/>
     </session-factory>
 </hibernate-configuration>
