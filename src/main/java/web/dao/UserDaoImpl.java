@@ -1,80 +1,73 @@
 package web.dao;
 
-import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import web.entity.UserEntity;
 import web.model.User;
-import web.util.HibernateUtil;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Transactional
 public class UserDaoImpl implements UserDao {
-   SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+    private final SessionFactory sessionFactory;
 
-    public UserDaoImpl() {
-
+    @Autowired
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
+    @Override
     public List<User> getUsers() {
-        Session session = sessionFactory.openSession();
-        List<UserEntity> usersEntity = session.createQuery("from UserEntity", UserEntity.class).list();
-        session.close();
         List<User> users = new ArrayList<>();
-        for(UserEntity var :usersEntity){
-            users.add(new User(var.getId(),var.getName(),var.getAge()));
+        Session session = sessionFactory.getCurrentSession();
+        List<UserEntity> usersEntity = session.createQuery("from UserEntity", UserEntity.class).list();
+        for (UserEntity userEntity : usersEntity) {
+            users.add(new User(userEntity.getId(), userEntity.getName(), userEntity.getAge()));
         }
-
         return users;
     }
 
+    @Override
     public User getUser(long id) {
-        Session session = sessionFactory.openSession();
+        Session session = sessionFactory.getCurrentSession();
         UserEntity userEntity = session.get(UserEntity.class, id);
-        session.close();
-        User user=new User(userEntity.getName(),userEntity.getAge());
+        User user = null;
+        if (userEntity != null) {
+            user = new User(userEntity.getId(), userEntity.getName(), userEntity.getAge());
+        }
         return user;
     }
 
+    @Override
     public void saveUser(User user) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            UserEntity userEntity = new UserEntity();
+        Session session = sessionFactory.getCurrentSession();
+        UserEntity userEntity = new UserEntity(user.getName(), user.getAge());
+        session.save(userEntity);
+    }
+
+    @Override
+    public void updateUser(User user) {
+        Session session = sessionFactory.getCurrentSession();
+        UserEntity userEntity = session.get(UserEntity.class, user.getId());
+        System.out.println("updateUser"+user.getId());
+        if (userEntity != null) {
             userEntity.setName(user.getName());
             userEntity.setAge(user.getAge());
-            session.save(user);
-            tx.commit();
-        } catch (HibernateException e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            session.close();
+            session.saveOrUpdate(userEntity);
         }
     }
 
-    public void updateUser(User user) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.update(user);
-        transaction.commit();
-        session.close();
-    }
-
+    @Override
     public void deleteUser(long id) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        User user = session.get(User.class, id);
-        if (user != null) {
-            session.delete(user);
+        Session session = sessionFactory.getCurrentSession();
+        UserEntity userEntity = session.get(UserEntity.class, id);
+        if (userEntity != null) {
+            session.delete(userEntity);
         }
-        transaction.commit();
-        session.close();
     }
 }

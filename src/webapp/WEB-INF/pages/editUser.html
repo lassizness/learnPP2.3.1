@@ -6,10 +6,13 @@
 </head>
 <body>
 <h2>Edit User</h2>
-<form th:object="${user}" th:action="@{/edit}" method="post">
+<form th:object="${user}" th:action="@{/users/edit}" method="post">
   <input type="hidden" th:field="*{id}">
+  <input type="hidden" name="id" th:value="${id}">
   <label for="name">Name:</label>
   <input type="text" id="name" th:field="*{name}">
+  <label for="age">Age:</label>
+  <input type="text" id="age" th:field="*{age}">
   <input type="submit" value="Save">
 </form>
 </body>

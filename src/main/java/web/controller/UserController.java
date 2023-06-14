@@ -14,6 +14,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
+    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -43,13 +44,16 @@ public class UserController {
     @GetMapping("/users/edit/{id}")
     public String editUserForm(@PathVariable("id") long id, Model model) {
         User user = userService.getUser(id);
+        model.addAttribute("id", id);
         model.addAttribute("user", user);
         return "editUser"; // removed leading slash
     }
 
     @PostMapping("/users/edit")
-    public String editUser(User user) {
+    public String editUser(@RequestParam("id")long id, User user) {//как костыль пришлось добавить сетер в модель
+        user.setId(id);
         userService.updateUser(user);
+
         return "redirect:/users";
     }
 }

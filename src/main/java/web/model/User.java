@@ -22,7 +22,10 @@ public class User {
     public User() {
 
     }
-    public User(Long id, String name, Integer age) {
+    public User(long id, String name, Integer age) {
+        this.id=id;
+        this.name = name;
+        this.age = age;
     }
 
     public String getName() {
@@ -55,5 +58,9 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, age);
+    }
+
+    public void setId(long id) {//костыль, больше чем уверен этот сетер не нужен
+        this.id=id;
     }
 }
